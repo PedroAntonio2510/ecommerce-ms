@@ -2,6 +2,7 @@ package com.ms.ecommerce.service;
 
 import com.ms.ecommerce.model.Order;
 import com.ms.ecommerce.model.Product;
+import com.ms.ecommerce.model.enums.OrderStatus;
 import com.ms.ecommerce.model.mapper.OrderMapper;
 import com.ms.ecommerce.repositories.OrderRepositoy;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class OrderService {
 
         product.setQuantity(product.getQuantity() - order.getQuantity());
         productService.saveProduct(product);
-
+        order.setStatus(OrderStatus.PROCESSED);
         return repositoy.save(order);
     }
 

@@ -43,5 +43,7 @@ public class Order {
     @Column(name = "orderDate")
     private LocalDateTime orderDate;
 
-
+    @ManyToOne
+    @JoinColumn(name = "id_userModel")
+    private UserModel user;
 }
