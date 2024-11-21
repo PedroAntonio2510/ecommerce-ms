@@ -1,24 +1,26 @@
 package com.ms.ecommerce.model.mapper;
 
 import com.ms.ecommerce.model.Order;
+import com.ms.ecommerce.model.Product;
 import com.ms.ecommerce.model.dtos.OrderRequestDTo;
 import com.ms.ecommerce.model.dtos.OrderResponseDTO;
 import com.ms.ecommerce.repositories.ProductRepository;
+import lombok.AllArgsConstructor;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Mapper()
-public abstract class OrderMapper {
+import java.util.UUID;
 
-    OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
+@Mapper(componentModel = "spring", uses = ProductMapper.class)
+public abstract class OrderMapper {
 
     @Autowired
     ProductRepository productRepository;
 
     @Mapping(target = "product", expression = "java( productRepository.findById(dto.productId()).orElse(null) )")
-    abstract Order toEntity(OrderRequestDTo dto);
+    public abstract Order toEntity(OrderRequestDTo dto);
 
-    abstract OrderResponseDTO toDTO(Order order);
+    public abstract OrderResponseDTO toDTO(Order order);
+
 }

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,16 +19,20 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/products")
-public class ProductController {
+public class ProductController implements GenericController{
 
     @Autowired
     private ProductService service;
 
+    @Autowired
+    private ProductMapper mapper;
+
     @PostMapping
     public ResponseEntity<?> save(@RequestBody @Valid ProductRequestDTO dto){
-        Product product = ProductMapper.INSTANCE.toEntity(dto);
+        Product product = mapper.toEntity(dto);
+        URI uri = headerLocation(product.getId());
         service.saveProduct(product);
-        return ResponseEntity.ok("Created product " + product);
+        return ResponseEntity.created(uri).build();
     }
 
 
@@ -35,7 +40,7 @@ public class ProductController {
     public ResponseEntity<List<ProductResponseDTO>> search(@RequestParam(value = "name", required = false) String name,
                                                            @RequestParam(value = "price", required = false)BigDecimal price){
         List<Product> listProducts = service.searchProducts(name, price);
-        List<ProductResponseDTO> productResponse = listProducts.stream().map(ProductMapper.INSTANCE::toDTO).collect(Collectors.toList());
+        List<ProductResponseDTO> productResponse = listProducts.stream().map(mapper::toDTO).collect(Collectors.toList());
         return ResponseEntity.ok(productResponse);
     }
 
@@ -45,7 +50,7 @@ public class ProductController {
 
         return service.getProductById(productId)
                 .map(product -> {
-                    ProductResponseDTO dto = ProductMapper.INSTANCE.toDTO(product);
+                    ProductResponseDTO dto = mapper.toDTO(product);
                     return ResponseEntity.ok(dto);
                 }).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -55,7 +60,7 @@ public class ProductController {
     public ResponseEntity<?> update(@PathVariable String id, @RequestBody @Valid ProductRequestDTO dto) {
         return service.getProductById(UUID.fromString(id))
                 .map(product -> {
-                    Product newProduct = ProductMapper.INSTANCE.toEntity(dto);
+                    Product newProduct = mapper.toEntity(dto);
                     product.setName(newProduct.getName());
                     product.setDescription(newProduct.getDescription());
                     product.setPrice(newProduct.getPrice());

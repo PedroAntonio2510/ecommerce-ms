@@ -2,34 +2,45 @@ package com.ms.ecommerce.service;
 
 import com.ms.ecommerce.model.Order;
 import com.ms.ecommerce.model.Product;
-import com.ms.ecommerce.model.enums.OrderStatus;
+import com.ms.ecommerce.model.mapper.OrderMapper;
 import com.ms.ecommerce.repositories.OrderRepositoy;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class OrderService {
 
-    @Autowired
-    private OrderRepositoy repositoy;
+    private final OrderRepositoy repositoy;
+    private final OrderMapper orderMapper;
+    private final ProductService productService;
 
-    @Autowired
-    private ProductService productService;
 
-    public Order saveOrder(Order order){
-        Optional<Product> product = productService.getProductById(order.getProduct().getId());
+    public Order saveOrder(Order order) {
 
-        if (!product.isPresent()) {
+        Optional<Product> productOptional = productService.getProductById(order.getProduct().getId());
+
+        if (!productOptional.isPresent()) {
             throw new IllegalArgumentException("Product not found");
         }
 
-        if (order.getQuantity() > product.get().getQuantity()){
+        Product product = productOptional.get();
+
+        if (order.getQuantity() > product.getQuantity()) {
             throw new RuntimeException("Insufficient stock");
         }
 
-        order.setStatus(OrderStatus.PROCESSED);
+        product.setQuantity(product.getQuantity() - order.getQuantity());
+        productService.saveProduct(product);
+
         return repositoy.save(order);
     }
+
+    public List<Order> getOrders() {
+        return repositoy.findAll();
+    }
+
 }
