@@ -1,4 +1,8 @@
 package com.ms.ecommerce.exceptions;
 
-public class ProductDuplicateException {
+public class ProductDuplicateException extends RuntimeException{
+
+    public ProductDuplicateException(String message) {
+        super(message);
+    }
 }

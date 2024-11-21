@@ -1,4 +1,5 @@
 package com.ms.ecommerce.exceptions;
 
-public class InsuffienctStockException {
+public class InsuffienctStockException extends RuntimeException{
+
 }

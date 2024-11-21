@@ -3,6 +3,7 @@ package com.ms.ecommerce.service;
 import com.ms.ecommerce.model.Product;
 import com.ms.ecommerce.repositories.ProductRepository;
 import com.ms.ecommerce.repositories.specs.ProductSpecs;
+import com.ms.ecommerce.validator.ProductValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,11 @@ public class ProductService {
     @Autowired
     private ProductRepository repository;
 
+    @Autowired
+    private ProductValidator validator;
+
     public Product saveProduct(Product product){
+        validator.validate(product);
         return repository.save(product);
     }
 
