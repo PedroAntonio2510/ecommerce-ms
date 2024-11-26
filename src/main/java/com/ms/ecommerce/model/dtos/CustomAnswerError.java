@@ -17,4 +17,8 @@ public record CustomAnswerError(
         return new CustomAnswerError(message, HttpStatus.CONFLICT.value(), List.of());
     }
 
+    public static CustomAnswerError notAllowed(String message){
+        return new CustomAnswerError(message, HttpStatus.NOT_ACCEPTABLE.value(), List.of());
+    }
+
 }

@@ -8,6 +8,7 @@ import com.ms.ecommerce.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -28,6 +29,7 @@ public class ProductController implements GenericController{
     private ProductMapper mapper;
 
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> save(@RequestBody @Valid ProductRequestDTO dto){
         Product product = mapper.toEntity(dto);
         URI uri = headerLocation(product.getId());
@@ -37,6 +39,7 @@ public class ProductController implements GenericController{
 
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER', 'CLIENT')")
     public ResponseEntity<List<ProductResponseDTO>> search(@RequestParam(value = "name", required = false) String name,
                                                            @RequestParam(value = "price", required = false)BigDecimal price){
         List<Product> listProducts = service.searchProducts(name, price);
@@ -45,6 +48,7 @@ public class ProductController implements GenericController{
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CLIENT')")
     public ResponseEntity<ProductResponseDTO> getProductDetails(@PathVariable String id) {
         var productId = UUID.fromString(id);
 
@@ -57,6 +61,7 @@ public class ProductController implements GenericController{
 
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> update(@PathVariable String id, @RequestBody @Valid ProductRequestDTO dto) {
         return service.getProductById(UUID.fromString(id))
                 .map(product -> {
@@ -74,6 +79,7 @@ public class ProductController implements GenericController{
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> delete(@PathVariable String id) {
         var idProduct = UUID.fromString(id);
         Optional<Product> productOptional = service.getProductById(idProduct);

@@ -1,13 +1,16 @@
 package com.ms.ecommerce.controller;
 
 import com.ms.ecommerce.model.Order;
+import com.ms.ecommerce.model.UserModel;
 import com.ms.ecommerce.model.dtos.OrderRequestDTo;
 import com.ms.ecommerce.model.dtos.OrderResponseDTO;
 import com.ms.ecommerce.model.mapper.OrderMapper;
+import com.ms.ecommerce.security.SecurityService;
 import com.ms.ecommerce.service.OrderService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -16,23 +19,26 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/orders")
+@RequiredArgsConstructor
 public class OrderController implements GenericController{
 
-    @Autowired
-    private OrderService service;
-
-    @Autowired
-    private OrderMapper mapper;
+    private final OrderService service;
+    private final OrderMapper mapper;
+    private final SecurityService securityService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('MANAGER', 'CLIENT')")
     public ResponseEntity<?> save(@RequestBody @Valid OrderRequestDTo dto){
+        UserModel userModel = securityService.getUserLogged();
         Order order = mapper.toEntity(dto);
-        URI uri = headerLocation(order.getId());
+        order.setUser(userModel);
         service.saveOrder(order);
+        URI uri = headerLocation(order.getId());
         return ResponseEntity.created(uri).build();
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER', 'CLIENT')")
     public ResponseEntity<List<OrderResponseDTO>> getAllOrders() {
         List<Order> orders = service.getOrders();
         List<OrderResponseDTO> orderResponse = orders
