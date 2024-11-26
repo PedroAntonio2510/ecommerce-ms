@@ -1,7 +1,6 @@
 package com.ms.ecommerce.validator;
 
 import com.ms.ecommerce.exceptions.ProductDuplicateException;
-import com.ms.ecommerce.model.Product;
 import com.ms.ecommerce.model.UserModel;
 import com.ms.ecommerce.repositories.UserModelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,7 @@ public class UserModelValidator {
 
     public void validate(UserModel userModel){
         if (existsUserModel(userModel)) {
-            throw new ProductDuplicateException("Product already registered");
+            throw new ProductDuplicateException("User already registered");
         }
     }
 

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -36,6 +37,19 @@ public class OrderController implements GenericController{
         URI uri = headerLocation(order.getId());
         return ResponseEntity.created(uri).build();
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> update(@PathVariable String id, @RequestBody Order order) {
+        return service.getOrderById(UUID.fromString(id))
+                .map(existingOrder -> {
+                    existingOrder.setStatus(order.getStatus());
+                    service.updateOrder(existingOrder);
+                    return ResponseEntity.noContent().build();
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 
     @GetMapping
     @PreAuthorize("hasAnyRole('MANAGER', 'CLIENT')")

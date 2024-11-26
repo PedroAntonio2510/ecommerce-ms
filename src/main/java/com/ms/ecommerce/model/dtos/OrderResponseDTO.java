@@ -1,6 +1,5 @@
 package com.ms.ecommerce.model.dtos;
 
-import com.ms.ecommerce.model.Product;
 import com.ms.ecommerce.model.enums.OrderPayment;
 import com.ms.ecommerce.model.enums.OrderStatus;
 
