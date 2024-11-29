@@ -17,11 +17,11 @@ public class OrderService {
 
     private final OrderRepositoy repositoy;
     private final ProductService productService;
+    private final RabbitmqNotificationService rabbitmqNotificationService;
 
+    public Order saveOrder(Order response) {
 
-    public Order saveOrder(Order order) {
-
-        Optional<Product> productOptional = productService.getProductById(order.getProduct().getId());
+        Optional<Product> productOptional = productService.getProductById(response.getProduct().getId());
 
         if (!productOptional.isPresent()) {
             throw new IllegalArgumentException("Product not found");
@@ -29,14 +29,22 @@ public class OrderService {
 
         Product product = productOptional.get();
 
-        if (order.getQuantity() > product.getQuantity()) {
+        if (response.getQuantity() > product.getQuantity()) {
             throw new RuntimeException("Insufficient stock");
         }
 
-        product.setQuantity(product.getQuantity() - order.getQuantity());
+        product.setQuantity(product.getQuantity() - response.getQuantity());
         productService.saveProduct(product);
-        order.setStatus(OrderStatus.PROCESSED);
-        return repositoy.save(order);
+        response.setStatus(OrderStatus.PENDING);
+
+        Order savedOrder = repositoy.save(response);
+
+        if (savedOrder.getId() == null){
+            throw new RuntimeException("ID is null after saving");
+        }
+
+        rabbitmqNotificationService.notificate(savedOrder, "order-notification.ex");
+        return savedOrder;
     }
 
     public List<Order> getOrders() {

@@ -7,6 +7,7 @@ import com.ms.ecommerce.model.dtos.OrderResponseDTO;
 import com.ms.ecommerce.model.mapper.OrderMapper;
 import com.ms.ecommerce.security.SecurityService;
 import com.ms.ecommerce.service.OrderService;
+import com.ms.ecommerce.service.RabbitmqNotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,8 @@ public class OrderController implements GenericController{
     private final OrderService service;
     private final OrderMapper mapper;
     private final SecurityService securityService;
+    private final RabbitmqNotificationService rabbitmqNotificationService;
+
 
     @PostMapping
     @PreAuthorize("hasAnyRole('MANAGER', 'CLIENT')")

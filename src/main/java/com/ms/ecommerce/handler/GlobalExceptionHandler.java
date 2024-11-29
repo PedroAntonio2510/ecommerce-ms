@@ -51,11 +51,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ProductDuplicateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public CustomAnswerError handleProductDuplicateException(ProductDuplicateException e){
         return CustomAnswerError.conflict(e.getMessage());
     }
 
     @ExceptionHandler(InsufficientStockException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public CustomAnswerError handleInsufficientStockException(InsufficientStockException e){
         return CustomAnswerError.notAllowed(e.getMessage());
     }
