@@ -12,6 +12,6 @@ public class RabbitmqNotificationService {
     private RabbitTemplate rabbitTemplate;
 
     public void notificate(Order order, String exchange){
-        rabbitTemplate.convertAndSend(exchange, "", order);
+        rabbitTemplate.convertAndSend(exchange, "order.created", order);
     }
 }

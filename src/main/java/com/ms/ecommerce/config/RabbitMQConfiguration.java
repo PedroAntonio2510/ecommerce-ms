@@ -5,6 +5,7 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -13,15 +14,41 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfiguration {
 
+    @Value("${rabbitmq.order.exchange}")
+    private String orderExchange;
+
+    @Value("${rabbitmq.order.created.queue}")
+    private String orderCreatedQueue;
+
+    @Value("${rabbitmq.order.updated.queue}")
+    private String orderUpdatedQueue;
+
     //Create the queue
     @Bean
-    public Queue createQueueNotificationOrderPending() {
-        return QueueBuilder.durable("order-pending.ms-notification").build();
+    public Queue orderCreatedQueue() {
+        return new Queue(orderCreatedQueue, true);
     }
 
     @Bean
-    public Queue createQueueNotificationOrderProcessed() {
-        return QueueBuilder.durable("order-processed.ms-notification").build();
+    public Queue orderUpdatedQueue() {
+        return new Queue(orderUpdatedQueue, true);
+    }
+
+    @Bean
+    public DirectExchange creteDirectOrderExchange() {
+        return new DirectExchange(orderExchange);
+    }
+
+    @Bean
+    public Binding bindingOrderCreatedQueue(DirectExchange orderExchange, Queue orderCreatedQueue){
+        return BindingBuilder.bind(orderCreatedQueue)
+                .to(orderExchange).with("order.created");
+    }
+
+    @Bean
+    public Binding bindingOrderUpdatedQueue(DirectExchange orderExchange, Queue orderUpdatedQueue){
+        return BindingBuilder.bind(orderUpdatedQueue)
+                .to(orderExchange).with("order-updated");
     }
 
     //Create the admin
@@ -33,17 +60,6 @@ public class RabbitMQConfiguration {
     @Bean
     public ApplicationListener<ApplicationReadyEvent> initializeAdmin(RabbitAdmin rabbitAdmin){
         return event -> rabbitAdmin.initialize();
-    }
-
-    @Bean
-    public FanoutExchange createFanoutExchangeOrderNotification(){
-        return ExchangeBuilder.fanoutExchange("order-notification.ex").build();
-    }
-
-    @Bean
-    public Binding createBindingOrderPending() {
-        return BindingBuilder.bind(createQueueNotificationOrderPending())
-                .to(createFanoutExchangeOrderNotification());
     }
 
     @Bean
